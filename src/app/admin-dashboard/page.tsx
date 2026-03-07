@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -27,7 +27,7 @@ const studentAdmissionFormSchema = z.object({
 
 type StudentAdmissionFormValues = z.infer<typeof studentAdmissionFormSchema>;
 
-export default function AdminDashboardPage() {
+function AdminDashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editRollNoFromQueryParameter = searchParams.get("editRollNo");
@@ -36,7 +36,6 @@ export default function AdminDashboardPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [selectedPhotoFile, setSelectedPhotoFile] = useState<File | null>(null);
-  const [existingStudentPhotoUrl, setExistingStudentPhotoUrl] = useState("");
   const [createStudent, { isLoading }] = useCreateSingleStudentRecordMutation();
   const [updateStudentRecord, { isLoading: isUpdateLoading }] =
     useUpdateSingleStudentRecordMutation();
@@ -68,8 +67,9 @@ export default function AdminDashboardPage() {
       dob: existingStudentDetails.dob,
       course: existingStudentDetails.course,
     });
-    setExistingStudentPhotoUrl(existingStudentDetails.photoUrl);
   }, [existingStudentDetails, reset]);
+
+  const existingStudentPhotoUrl = existingStudentDetails?.photoUrl ?? "";
 
   async function handleStudentAdmissionFormSubmit(
     formValues: StudentAdmissionFormValues,
@@ -211,5 +211,26 @@ export default function AdminDashboardPage() {
         </Card>
       </div>
     </main>
+  );
+}
+
+export default function AdminDashboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="w-full px-4 py-8 md:pl-80 md:pr-8">
+          <Sidebar activePath="admission" />
+          <div className="mx-auto mt-3 w-1/2 max-w-5xl">
+            <Card>
+              <CardTitle className="text-center">
+                Loading dashboard...
+              </CardTitle>
+            </Card>
+          </div>
+        </main>
+      }
+    >
+      <AdminDashboardContent />
+    </Suspense>
   );
 }
