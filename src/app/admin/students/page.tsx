@@ -7,36 +7,24 @@ import { Sidebar } from "@/components/sidebar";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Table, TableCell, TableHead } from "@/components/ui/table";
 import { isAdminSessionAuthenticatedInLocalStorage } from "@/lib/session";
-import { useGetAllStudentsFromFirestoreQuery } from "@/store/api/portalApi";
+import {
+  useGetAllStudentsFromFirestoreQuery,
+  useUpdateSingleStudentRecordMutation,
+} from "@/store/api/portalApi";
 import type { StudentDocument } from "@/types/student";
-
-const SOFT_DELETED_STUDENT_ROLL_NUMBERS_STORAGE_KEY =
-  "student_result_portal_soft_deleted_student_roll_numbers";
 
 export default function AdminStudentListPage() {
   const router = useRouter();
   const { data: students = [], isLoading } =
     useGetAllStudentsFromFirestoreQuery();
-  const [softDeletedStudentRollNumbers, setSoftDeletedStudentRollNumbers] =
-    useState<string[]>(() => {
-      if (typeof window === "undefined") {
-        return [];
-      }
-
-      const storedSoftDeletedStudentRollNumbers = localStorage.getItem(
-        SOFT_DELETED_STUDENT_ROLL_NUMBERS_STORAGE_KEY,
-      );
-
-      if (!storedSoftDeletedStudentRollNumbers) {
-        return [];
-      }
-
-      try {
-        return JSON.parse(storedSoftDeletedStudentRollNumbers) as string[];
-      } catch {
-        return [];
-      }
-    });
+  const [updateSingleStudentRecord, { isLoading: isUpdatingStudent }] =
+    useUpdateSingleStudentRecordMutation();
+  const [studentTableActionErrorMessage, setStudentTableActionErrorMessage] =
+    useState("");
+  const [
+    studentRollNumberBeingSoftDeleted,
+    setStudentRollNumberBeingSoftDeleted,
+  ] = useState("");
 
   useEffect(() => {
     if (!isAdminSessionAuthenticatedInLocalStorage()) {
@@ -46,9 +34,9 @@ export default function AdminStudentListPage() {
 
   const visibleStudents = useMemo(() => {
     return students.filter((student) => {
-      return !softDeletedStudentRollNumbers.includes(student.rollNo);
+      return student.isDelete !== true;
     });
-  }, [students, softDeletedStudentRollNumbers]);
+  }, [students]);
 
   function handleEditStudentActionClick(student: StudentDocument): void {
     router.push(
@@ -56,24 +44,36 @@ export default function AdminStudentListPage() {
     );
   }
 
-  function handleSoftDeleteStudentActionClick(studentRollNumber: string): void {
-    setSoftDeletedStudentRollNumbers((currentSoftDeletedStudentRollNumbers) => {
-      if (currentSoftDeletedStudentRollNumbers.includes(studentRollNumber)) {
-        return currentSoftDeletedStudentRollNumbers;
-      }
+  function handleStudentRowClickForResultFlow(student: StudentDocument): void {
+    if (student.resultPosted) {
+      router.push(`/admin/update-result/${encodeURIComponent(student.rollNo)}`);
+      return;
+    }
 
-      const updatedSoftDeletedStudentRollNumbers = [
-        ...currentSoftDeletedStudentRollNumbers,
-        studentRollNumber,
-      ];
+    router.push(`/admin/add-result/${encodeURIComponent(student.rollNo)}`);
+  }
 
-      localStorage.setItem(
-        SOFT_DELETED_STUDENT_ROLL_NUMBERS_STORAGE_KEY,
-        JSON.stringify(updatedSoftDeletedStudentRollNumbers),
+  async function handleSoftDeleteStudentActionClick(
+    studentRollNumber: string,
+  ): Promise<void> {
+    setStudentTableActionErrorMessage("");
+    setStudentRollNumberBeingSoftDeleted(studentRollNumber);
+
+    try {
+      await updateSingleStudentRecord({
+        rollNo: studentRollNumber,
+        payload: {
+          isDelete: true,
+        },
+      }).unwrap();
+    } catch (error) {
+      setStudentTableActionErrorMessage(
+        (error as { error?: string })?.error ??
+          "Unable to soft delete student right now.",
       );
-
-      return updatedSoftDeletedStudentRollNumbers;
-    });
+    } finally {
+      setStudentRollNumberBeingSoftDeleted("");
+    }
   }
 
   return (
@@ -85,6 +85,11 @@ export default function AdminStudentListPage() {
           <CardTitle>Student List</CardTitle>
           {isLoading ? (
             <p className="mt-4 text-sm text-[#675f74]">Loading students...</p>
+          ) : null}
+          {studentTableActionErrorMessage ? (
+            <p className="mt-4 text-sm text-red-600">
+              {studentTableActionErrorMessage}
+            </p>
           ) : null}
 
           <div className="mt-5 overflow-x-auto rounded-xl border border-[#e4deee]">
@@ -101,7 +106,13 @@ export default function AdminStudentListPage() {
               </thead>
               <tbody>
                 {visibleStudents.map((student, index) => (
-                  <tr key={student.rollNo}>
+                  <tr
+                    key={student.rollNo}
+                    className="cursor-pointer transition hover:bg-[#faf7ff]"
+                    onClick={() => {
+                      handleStudentRowClickForResultFlow(student);
+                    }}
+                  >
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>{student.rollNo}</TableCell>
                     <TableCell>{student.name}</TableCell>
@@ -117,7 +128,8 @@ export default function AdminStudentListPage() {
                           type="button"
                           className="text-blue-600 transition hover:text-blue-700"
                           title="Update"
-                          onClick={() => {
+                          onClick={(event) => {
+                            event.stopPropagation();
                             handleEditStudentActionClick(student);
                           }}
                         >
@@ -127,8 +139,15 @@ export default function AdminStudentListPage() {
                           type="button"
                           className="text-red-600 transition hover:text-red-700"
                           title="Delete (UI only)"
-                          onClick={() => {
-                            handleSoftDeleteStudentActionClick(student.rollNo);
+                          disabled={
+                            isUpdatingStudent &&
+                            studentRollNumberBeingSoftDeleted === student.rollNo
+                          }
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            void handleSoftDeleteStudentActionClick(
+                              student.rollNo,
+                            );
                           }}
                         >
                           <FiTrash2 size={18} />

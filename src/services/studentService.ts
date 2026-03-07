@@ -115,6 +115,7 @@ export async function createStudent(
   await setDoc(studentDocumentReference, {
     ...studentPayload,
     resultPosted: false,
+    isDelete: false,
     createdAt: new Date().toISOString(),
   });
 }

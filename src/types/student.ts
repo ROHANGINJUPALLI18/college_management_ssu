@@ -5,6 +5,7 @@ export type StudentDocument = {
   course: string;
   photoUrl: string;
   resultPosted: boolean;
+  isDelete?: boolean;
   createdAt?: unknown;
 };
 
