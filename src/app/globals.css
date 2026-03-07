@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+:root {
+  --portal-background: #f6f5f8;
+  --portal-surface: #ffffff;
+  --portal-primary: #2f0a5e;
+  --portal-accent: #f6b100;
+  --portal-text: #26113f;
+}
+
+@theme inline {
+  --color-background: var(--portal-background);
+  --color-foreground: var(--portal-text);
+  --font-sans: var(--font-body);
+}
+
+body {
+  background: radial-gradient(circle at 10% 10%, #ede8f7 0%, #f8f6fb 30%, #f6f5f8 100%);
+  color: var(--portal-text);
+  font-family: var(--font-body), sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading), serif;
+}
