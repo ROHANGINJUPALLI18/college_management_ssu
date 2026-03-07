@@ -51,12 +51,9 @@ export default function AdminStudentListPage() {
   }, [students, softDeletedStudentRollNumbers]);
 
   function handleEditStudentActionClick(student: StudentDocument): void {
-    if (student.resultPosted) {
-      router.push(`/admin/update-result/${student.rollNo}`);
-      return;
-    }
-
-    router.push(`/admin/add-result/${student.rollNo}`);
+    router.push(
+      `/admin-dashboard?editRollNo=${encodeURIComponent(student.rollNo)}`,
+    );
   }
 
   function handleSoftDeleteStudentActionClick(studentRollNumber: string): void {

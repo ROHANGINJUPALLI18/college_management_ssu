@@ -1,6 +1,8 @@
 import {
   collection,
   doc,
+  type DocumentData,
+  type DocumentReference,
   getDoc,
   getDocs,
   query,
@@ -26,6 +28,44 @@ function getStudentsCollectionReferenceOrThrowConfigurationError() {
   return collection(firestoreDatabase, "students");
 }
 
+async function getStudentDocumentReferenceByRollNumber(
+  rollNo: string,
+): Promise<DocumentReference<DocumentData> | null> {
+  if (!firestoreDatabase) {
+    throw new Error("Firebase is not configured. Please add Firebase env values.");
+  }
+
+  const studentDocumentReferenceUsingRollNumberAsDocumentId = doc(
+    firestoreDatabase,
+    "students",
+    rollNo,
+  );
+
+  const studentDocumentSnapshotUsingRollNumberAsDocumentId = await getDoc(
+    studentDocumentReferenceUsingRollNumberAsDocumentId,
+  );
+
+  if (studentDocumentSnapshotUsingRollNumberAsDocumentId.exists()) {
+    return studentDocumentSnapshotUsingRollNumberAsDocumentId.ref;
+  }
+
+  const studentsCollectionReference = getStudentsCollectionReferenceOrThrowConfigurationError();
+  const studentQueryByRollNumberField = query(
+    studentsCollectionReference,
+    where("rollNo", "==", rollNo),
+  );
+
+  const studentQueryByRollNumberFieldSnapshot = await getDocs(
+    studentQueryByRollNumberField,
+  );
+
+  if (studentQueryByRollNumberFieldSnapshot.empty) {
+    return null;
+  }
+
+  return studentQueryByRollNumberFieldSnapshot.docs[0].ref;
+}
+
 export async function getStudents(): Promise<StudentDocument[]> {
   await ensureFirebaseAnonymousSessionIsActive();
   const studentsCollectionReference = getStudentsCollectionReferenceOrThrowConfigurationError();
@@ -40,11 +80,14 @@ export async function getStudentByRollNo(
 ): Promise<StudentDocument | null> {
   await ensureFirebaseAnonymousSessionIsActive();
 
-  if (!firestoreDatabase) {
-    throw new Error("Firebase is not configured. Please add Firebase env values.");
+  const studentDocumentReference = await getStudentDocumentReferenceByRollNumber(
+    rollNo,
+  );
+
+  if (!studentDocumentReference) {
+    return null;
   }
 
-  const studentDocumentReference = doc(firestoreDatabase, "students", rollNo);
   const studentDocumentSnapshot = await getDoc(studentDocumentReference);
 
   if (!studentDocumentSnapshot.exists()) {
@@ -82,11 +125,14 @@ export async function updateStudent(
 ): Promise<void> {
   await ensureFirebaseAnonymousSessionIsActive();
 
-  if (!firestoreDatabase) {
-    throw new Error("Firebase is not configured. Please add Firebase env values.");
+  const studentDocumentReference = await getStudentDocumentReferenceByRollNumber(
+    rollNo,
+  );
+
+  if (!studentDocumentReference) {
+    throw new Error("Student not found for the provided roll number.");
   }
 
-  const studentDocumentReference = doc(firestoreDatabase, "students", rollNo);
   await updateDoc(studentDocumentReference, updatedStudentData);
 }
 
