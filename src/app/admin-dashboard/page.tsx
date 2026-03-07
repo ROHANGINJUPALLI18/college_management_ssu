@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,8 +29,13 @@ type StudentAdmissionFormValues = z.infer<typeof studentAdmissionFormSchema>;
 
 function AdminDashboardContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const editRollNoFromQueryParameter = searchParams.get("editRollNo");
+  const [editRollNoFromQueryParameter] = useState(() => {
+    if (typeof window === "undefined") {
+      return "";
+    }
+
+    return new URLSearchParams(window.location.search).get("editRollNo") ?? "";
+  });
   const isStudentEditMode = Boolean(editRollNoFromQueryParameter);
 
   const [errorMessage, setErrorMessage] = useState("");
@@ -215,22 +220,5 @@ function AdminDashboardContent() {
 }
 
 export default function AdminDashboardPage() {
-  return (
-    <Suspense
-      fallback={
-        <main className="w-full px-4 py-8 md:pl-80 md:pr-8">
-          <Sidebar activePath="admission" />
-          <div className="mx-auto mt-3 w-1/2 max-w-5xl">
-            <Card>
-              <CardTitle className="text-center">
-                Loading dashboard...
-              </CardTitle>
-            </Card>
-          </div>
-        </main>
-      }
-    >
-      <AdminDashboardContent />
-    </Suspense>
-  );
+  return <AdminDashboardContent />;
 }
