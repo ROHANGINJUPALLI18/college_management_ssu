@@ -50,9 +50,9 @@ export default function StudentLoginPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
       <Navbar />
-      <main className="mx-auto flex min-h-[calc(100vh-88px)] w-full max-w-md items-center px-4 py-8">
+      <main className="relative z-10 mx-auto flex min-h-[calc(100vh-88px)] w-full max-w-md items-center px-4 py-8">
         <Card className="w-full">
           <div className="mb-3 flex">
             <Link href="/">
@@ -88,7 +88,7 @@ export default function StudentLoginPage() {
             {errorMessage ? (
               <p className="text-sm text-red-600">{errorMessage}</p>
             ) : null}
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full bg-yellow-300 text-blue-900" disabled={isLoading}>
               {isLoading ? "Validating..." : "Login"}
             </Button>
           </form>

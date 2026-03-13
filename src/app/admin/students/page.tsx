@@ -2,10 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FiEdit2, FiTrash2, FiPlus } from "react-icons/fi";
 import { Sidebar } from "@/components/sidebar";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Table, TableCell, TableHead } from "@/components/ui/table";
+import { Modal } from "@/components/ui/modal";
+import { StudentForm } from "@/components/admin/admin-dashboard-form";
 import { isAdminSessionAuthenticatedInLocalStorage } from "@/lib/session";
 import {
   useGetAllStudentsFromFirestoreQuery,
@@ -25,7 +27,9 @@ export default function AdminStudentListPage() {
     studentRollNumberBeingSoftDeleted,
     setStudentRollNumberBeingSoftDeleted,
   ] = useState("");
-
+  // modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalEditRollNo, setModalEditRollNo] = useState<string | null>(null);
   useEffect(() => {
     if (!isAdminSessionAuthenticatedInLocalStorage()) {
       router.replace("/admin-login");
@@ -39,9 +43,9 @@ export default function AdminStudentListPage() {
   }, [students]);
 
   function handleEditStudentActionClick(student: StudentDocument): void {
-    router.push(
-      `/admin-dashboard?editRollNo=${encodeURIComponent(student.rollNo)}`,
-    );
+    // open the form inside modal instead of navigating away
+    setModalEditRollNo(student.rollNo);
+    setIsModalOpen(true);
   }
 
   function handleStudentRowClickForResultFlow(student: StudentDocument): void {
@@ -167,6 +171,37 @@ export default function AdminStudentListPage() {
           </div>
         </Card>
       </div>
+
+      {/* floating add button */}
+      <button
+        className="fixed bottom-6 right-6 bg-blue-600 text-white rounded-full p-4 shadow-lg hover:bg-blue-700 z-50"
+        title="Add student"
+        onClick={() => {
+          setModalEditRollNo(null);
+          setIsModalOpen(true);
+        }}
+      >
+        <FiPlus size={24} />
+      </button>
+
+      {/* modal containing the student form */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setModalEditRollNo(null);
+        }}
+      >
+        <Card>
+          <CardTitle className="text-center">
+            {modalEditRollNo ? "Update Student Details" : "Student Admission"}
+          </CardTitle>
+          <StudentForm
+            editRollNo={modalEditRollNo ?? undefined}
+            onSuccess={() => setIsModalOpen(false)}
+          />
+        </Card>
+      </Modal>
     </main>
   );
 }

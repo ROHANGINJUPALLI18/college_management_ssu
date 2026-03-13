@@ -52,11 +52,11 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div>
+    <div className="min-h-screen relative">
       <Navbar />
-      <main className="mx-auto flex min-h-screen w-full max-w-md items-start px-4 pt-18 pb-8">
+      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-md items-start pt-16 px-4">
         <Card className="w-full">
-          <div className="mb-3 flex">
+          <div className="mb-2 flex">
             <Link href="/">
               <Button
                 variant="ghost"
@@ -70,7 +70,7 @@ export default function AdminLoginPage() {
           </div>
           <CardTitle className="text-center">Admin Login</CardTitle>
           <form
-            className="mt-5 space-y-4"
+            className="mt-3 space-y-4"
             onSubmit={handleSubmit(handleAdminLoginFormSubmit)}
           >
             <div>

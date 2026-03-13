@@ -8,7 +8,7 @@ export function Navbar() {
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4">
         <Link href="/" className="block">
           <Image
-            src="/ssu-logo.svg"
+            src="https://www.ssu.ac.in/images/new-ssu-logo.png"
             alt="Sikkim Skill University Logo"
             width={280}
             height={64}
@@ -18,7 +18,7 @@ export function Navbar() {
         </Link>
         <div className="flex gap-2">
           <Link href="/student-login">
-            <Button variant="outline">Student Login</Button>
+            <Button className="bg-yellow-300" variant="outline">Student Login</Button>
           </Link>
           <Link href="/admin-login">
             <Button>Admin Login</Button>
