@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { FileText } from "lucide-react";
 import { Sidebar } from "@/components/sidebar";
 import { ResultSubjectFields } from "@/components/result-subject-fields";
 import { Button } from "@/components/ui/button";
-import { Card, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { isAdminSessionAuthenticatedInLocalStorage } from "@/lib/session";
 import { useCreateStudentResultAndUpdateStudentPostingFlagMutation } from "@/store/api/portalApi";
 
@@ -53,52 +54,68 @@ export default function AddResultPage() {
   }
 
   return (
-    <main className="w-full px-4 py-8 md:pl-80 md:pr-8">
+    <div className="flex min-h-screen bg-[#f8fafc] overflow-x-hidden">
       <Sidebar activePath="students" />
 
-      <div className="mx-auto  w-3/4 mt-3 max-w-5xl">
-        <Card>
-          <CardTitle>Add Result - {rollNo}</CardTitle>
-          <div className="mt-4">
-            <ResultSubjectFields
-              subjects={subjects}
-              onSubjectNameChange={(subjectIndex, name) => {
-                setSubjects((currentSubjects) => {
-                  const updatedSubjects = [...currentSubjects];
-                  updatedSubjects[subjectIndex] = {
-                    ...updatedSubjects[subjectIndex],
-                    name,
-                  };
-                  return updatedSubjects;
-                });
-              }}
-              onSubjectMarksChange={(subjectIndex, marks) => {
-                setSubjects((currentSubjects) => {
-                  const updatedSubjects = [...currentSubjects];
-                  updatedSubjects[subjectIndex] = {
-                    ...updatedSubjects[subjectIndex],
-                    marks,
-                  };
-                  return updatedSubjects;
-                });
-              }}
-            />
-          </div>
+      <main className="flex-1 flex flex-col items-center p-6 md:ml-[280px] md:pr-12 md:py-12">
+        <div className="w-full max-w-[800px]">
+          <Card className="overflow-hidden rounded-2xl border-0 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.06)] ring-1 ring-slate-100">
+            <div className="bg-[#2d1b6b] px-8 py-8 text-center text-white">
+              <h1 className="text-2xl font-bold tracking-tight">Post Student Result</h1>
+              <p className="mt-2 text-sm font-medium text-indigo-200">
+                Roll Number: <span className="text-white bg-indigo-500/30 px-2 py-0.5 rounded-md">{rollNo}</span>
+              </p>
+            </div>
+            
+            <div className="px-8 pb-10 pt-8">
+              <div className="mb-6 border-b border-slate-100 pb-4">
+                <h2 className="text-lg font-bold text-slate-800">Subject Marks</h2>
+              </div>
+              
+              <ResultSubjectFields
+                subjects={subjects}
+                onSubjectNameChange={(subjectIndex, name) => {
+                  setSubjects((currentSubjects) => {
+                    const updatedSubjects = [...currentSubjects];
+                    updatedSubjects[subjectIndex] = {
+                      ...updatedSubjects[subjectIndex],
+                      name,
+                    };
+                    return updatedSubjects;
+                  });
+                }}
+                onSubjectMarksChange={(subjectIndex, marks) => {
+                  setSubjects((currentSubjects) => {
+                    const updatedSubjects = [...currentSubjects];
+                    updatedSubjects[subjectIndex] = {
+                      ...updatedSubjects[subjectIndex],
+                      marks,
+                    };
+                    return updatedSubjects;
+                  });
+                }}
+              />
 
-          {errorMessage ? (
-            <p className="mt-3 text-sm text-red-600">{errorMessage}</p>
-          ) : null}
-          <div className="flex justify-center">
-          <Button
-            className="mt-4"
-            disabled={isLoading}
-            onClick={handlePostResultButtonClick}
-          >
-            {isLoading ? "Posting..." : "Post Result"}
-          </Button>
+              {errorMessage ? (
+                <p className="mt-6 rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+                  {errorMessage}
+                </p>
+              ) : null}
+              
+              <div className="mt-8 flex justify-center">
+                <Button
+                  className="h-12 w-full max-w-[240px] rounded-xl bg-[#2d1b6b] text-base font-bold text-white shadow-md hover:bg-[#3d278b] hover:shadow-lg disabled:opacity-70"
+                  disabled={isLoading}
+                  onClick={handlePostResultButtonClick}
+                >
+                  <FileText className="mr-2 h-5 w-5" />
+                  {isLoading ? "Posting..." : "Post Result"}
+                </Button>
+              </div>
+            </div>
+          </Card>
         </div>
-        </Card>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }

@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { UserPlus } from "lucide-react";
 import { Sidebar } from "@/components/sidebar";
 import { Button } from "@/components/ui/button";
-import { Card, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { uploadStudentPhotoFileToCloudinary } from "@/lib/cloudinary";
@@ -148,83 +149,114 @@ export function StudentForm({ editRollNo, onSuccess }: StudentFormProps) {
 
   return (
     <form
-      className="mt-5 grid gap-4"
+      className="mt-1 flex flex-col gap-3"
       onSubmit={handleSubmit(handleStudentAdmissionFormSubmit)}
     >
       {isStudentEditMode && isExistingStudentLoading ? (
-        <p className="text-sm text-[#675f74]">Loading student details...</p>
+        <p className="text-xs text-[#675f74]">Loading student details...</p>
       ) : null}
 
-      <div>
-        <Label htmlFor="name">Name</Label>
-        <Input id="name" {...register("name")} />
-        <p className="mt-1 text-xs text-red-600">
+      <div className="flex flex-col space-y-1">
+        <Label htmlFor="name" className="text-xs font-semibold text-slate-700">
+          Name
+        </Label>
+        <Input
+          id="name"
+          placeholder="Enter full name"
+          className="h-10 rounded-lg border-slate-200 outline-none placeholder:text-slate-400 focus:border-[#2d1b6b] focus:ring-[#2d1b6b] shadow-sm transition-all"
+          {...register("name")}
+        />
+        <p className="min-h-[12px] text-[10px] font-medium text-red-500">
           {formState.errors.name?.message}
         </p>
       </div>
 
-      <div>
-        <Label htmlFor="rollNo">Roll Number</Label>
+      <div className="flex flex-col space-y-1">
+        <Label htmlFor="rollNo" className="text-xs font-semibold text-slate-700">
+          Roll Number
+        </Label>
         <Input
           id="rollNo"
+          placeholder="Enter roll number"
+          className="h-10 rounded-lg border-slate-200 outline-none placeholder:text-slate-400 focus:border-[#2d1b6b] focus:ring-[#2d1b6b] shadow-sm transition-all disabled:opacity-70 disabled:bg-slate-50"
           {...register("rollNo")}
           disabled={isStudentEditMode}
         />
-        <p className="mt-1 text-xs text-red-600">
+        <p className="min-h-[12px] text-[10px] font-medium text-red-500">
           {formState.errors.rollNo?.message}
         </p>
       </div>
 
-      <div>
-        <Label htmlFor="dob">Date of Birth</Label>
-        <Input id="dob" type="date" {...register("dob")} />
-        <p className="mt-1 text-xs text-red-600">
+      <div className="flex flex-col space-y-1">
+        <Label htmlFor="dob" className="text-xs font-semibold text-slate-700">
+          Date of Birth
+        </Label>
+        <Input
+          id="dob"
+          type="date"
+          className="h-10 rounded-lg border-slate-200 outline-none text-slate-700 placeholder:text-slate-400 focus:border-[#2d1b6b] focus:ring-[#2d1b6b] shadow-sm transition-all"
+          {...register("dob")}
+        />
+        <p className="min-h-[12px] text-[10px] font-medium text-red-500">
           {formState.errors.dob?.message}
         </p>
       </div>
 
-      <div>
-        <Label htmlFor="course">Course</Label>
-        <Input id="course" {...register("course")} />
-        <p className="mt-1 text-xs text-red-600">
+      <div className="flex flex-col space-y-1">
+        <Label htmlFor="course" className="text-xs font-semibold text-slate-700">
+          Course
+        </Label>
+        <Input
+          id="course"
+          placeholder="Enter course name"
+          className="h-10 rounded-lg border-slate-200 outline-none placeholder:text-slate-400 focus:border-[#2d1b6b] focus:ring-[#2d1b6b] shadow-sm transition-all"
+          {...register("course")}
+        />
+        <p className="min-h-[12px] text-[10px] font-medium text-red-500">
           {formState.errors.course?.message}
         </p>
       </div>
 
-      <div>
-        <Label htmlFor="studentPhoto">Student Photo</Label>
-        <Input
-          id="studentPhoto"
-          type="file"
-          accept="image/*"
-          onChange={(event) => {
-            const file = event.target.files?.[0] ?? null;
-            setSelectedPhotoFile(file);
-          }}
-        />
-        {isStudentEditMode ? (
-          <p className="mt-1 text-xs text-[#675f74]">
-            Optional in edit mode. Upload only if you want to replace current
-            photo.
-          </p>
-        ) : null}
+      <div className="flex flex-col space-y-1">
+        <Label
+          htmlFor="studentPhoto"
+          className="text-xs font-semibold text-slate-700"
+        >
+          Photo
+        </Label>
+        <div className="flex w-full overflow-hidden items-center rounded-lg border-2 border-dashed border-slate-300/80 bg-slate-50/50 hover:bg-slate-50 transition-colors">
+          <Input
+            id="studentPhoto"
+            type="file"
+            accept="image/*"
+            className="h-auto w-full cursor-pointer p-0 border-0 bg-transparent text-xs text-slate-500 shadow-none file:mr-3 file:border-0 file:bg-slate-200 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-[#32236a] hover:file:bg-slate-300 transition-all focus-visible:ring-0"
+            onChange={(event) => {
+              setSelectedPhotoFile(event.target.files?.[0] ?? null);
+            }}
+          />
+        </div>
       </div>
 
       {errorMessage ? (
-        <p className="text-sm text-red-600">{errorMessage}</p>
+        <p className="text-xs font-medium text-red-500">{errorMessage}</p>
       ) : null}
       {successMessage ? (
-        <p className="text-sm text-green-700">{successMessage}</p>
+        <p className="text-xs font-medium text-green-600">{successMessage}</p>
       ) : null}
 
-      <Button type="submit" disabled={isFormSubmitting}>
+      <Button
+        type="submit"
+        disabled={isFormSubmitting}
+        className="mt-3 h-10 w-full rounded-lg bg-[#2b1f63] text-sm font-bold tracking-wide text-white shadow-md transition-all hover:bg-[#322365] hover:shadow-lg disabled:opacity-70"
+      >
+        <UserPlus className="mr-2 h-4 w-4" />
         {isFormSubmitting
           ? isStudentEditMode
             ? "Saving..."
             : "Submitting..."
           : isStudentEditMode
-            ? "Save Student Details"
-            : "Submit Admission"}
+            ? "Save Changes"
+            : "Submit Record"}
       </Button>
     </form>
   );
@@ -242,19 +274,28 @@ export function AdminDashboardForm({
   editRollNoFromQueryParameter,
 }: AdminDashboardFormProps) {
   return (
-    <main className="w-full px-4 py-8 md:pl-80 md:pr-8">
+    <div className="flex min-h-screen bg-[#f8fafc] overflow-x-hidden">
       <Sidebar activePath="students" />
 
-      <div className="mx-auto mt-3 w-1/2 max-w-5xl">
-        <Card>
-          <CardTitle className="text-center">
-            {editRollNoFromQueryParameter
-              ? "Update Student Details"
-              : "Student Admission"}
-          </CardTitle>
-          <StudentForm editRollNo={editRollNoFromQueryParameter} />
-        </Card>
-      </div>
-    </main>
+      <main className="flex-1 flex flex-col items-center p-6 md:ml-[280px] md:py-12">
+        <div className="w-full max-w-[640px] px-4">
+          <Card className="overflow-hidden rounded-2xl border-0 bg-white shadow-[0_10px_40px_rgba(0,0,0,0.08)] ring-1 ring-slate-100">
+            <div className="bg-[#2d1b6b] px-8 py-8 text-center text-white">
+              <h1 className="text-2xl font-bold tracking-tight">
+                {editRollNoFromQueryParameter
+                  ? "Update Student Details"
+                  : "Student Admission"}
+              </h1>
+              <p className="mt-2 text-sm font-medium text-indigo-200">
+                Enrollment Application Form
+              </p>
+            </div>
+            <div className="px-8 pb-10 pt-6">
+              <StudentForm editRollNo={editRollNoFromQueryParameter} />
+            </div>
+          </Card>
+        </div>
+      </main>
+    </div>
   );
 }
