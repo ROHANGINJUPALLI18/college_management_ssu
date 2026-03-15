@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { RefreshCw } from "lucide-react";
 import { Sidebar } from "@/components/sidebar";
 import { ResultSubjectFields } from "@/components/result-subject-fields";
 import { Button } from "@/components/ui/button";
-import { Card, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { isAdminSessionAuthenticatedInLocalStorage } from "@/lib/session";
@@ -31,6 +32,7 @@ export default function UpdateResultPage() {
   const [editedSubjects, setEditedSubjects] = useState<
     { name: string; marks: number }[] | null
   >(null);
+  const [editedHeading, setEditedHeading] = useState<string | null>(null);
 
   const { data: student } = useGetSingleStudentByRollNumberQuery(rollNo);
   const { data: existingResult } = useGetStudentResultByRollNumberQuery(rollNo);
@@ -56,6 +58,7 @@ export default function UpdateResultPage() {
   }, [existingResult]);
 
   const subjects = editedSubjects ?? initialSubjectsFromExistingResult;
+  const heading = editedHeading ?? existingResult?.heading ?? "Semester 1";
 
   const hasAnySubjects = useMemo(
     () => subjects.some((subject) => subject.name.trim().length > 0),
@@ -67,13 +70,13 @@ export default function UpdateResultPage() {
       (subject) => !subject.name.trim() || Number.isNaN(subject.marks),
     );
 
-    if (hasIncompleteField) {
-      setErrorMessage("All subject and marks fields are required.");
+    if (!heading.trim() || hasIncompleteField) {
+      setErrorMessage("Result heading and all subject fields are required.");
       return;
     }
-
+ 
     try {
-      await updateResult({ rollNo, subjects }).unwrap();
+      await updateResult({ rollNo, heading, subjects }).unwrap();
       router.push("/admin/students");
     } catch (error) {
       setErrorMessage(
@@ -83,83 +86,111 @@ export default function UpdateResultPage() {
   }
 
   return (
-    <main className="w-full px-4 py-8 md:pl-80 md:pr-8">
+    <div className="flex min-h-screen bg-[#f8fafc] overflow-x-hidden">
       <Sidebar activePath="students" />
 
-      <div className="mx-auto w-3/4 mt-3 max-w-5xl">
-        <Card>
-          <CardTitle className="text-center" >Update Result - {rollNo}</CardTitle>
-          {!hasAnySubjects ? (
-            <p className="mt-3 text-sm text-[#615672]">
-              Loading existing result...
-            </p>
-          ) : null}
-
-          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
-              <Label htmlFor="studentName">Name</Label>
-              <Input
-                id="studentName"
-                value={student?.name ?? ""}
-                disabled
-                placeholder="Student Name"
-              />
+      <main className="flex-1 flex flex-col items-center p-6 md:ml-[280px] md:pr-12 md:py-12">
+        <div className="w-full max-w-[800px]">
+          <Card className="overflow-hidden rounded-2xl border-0 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.06)] ring-1 ring-slate-100">
+            <div className="bg-[#2d1b6b] px-8 py-8 text-center text-white">
+              <h1 className="text-2xl font-bold tracking-tight">Update Student Result</h1>
+              <p className="mt-2 text-sm font-medium text-indigo-200">
+                Roll Number: <span className="text-white bg-indigo-500/30 px-2 py-0.5 rounded-md">{rollNo}</span>
+              </p>
             </div>
-            <div>
-              <Label htmlFor="studentRollNo">Roll Number</Label>
-              <Input
-                id="studentRollNo"
-                value={student?.rollNo ?? rollNo}
-                disabled
-                placeholder="Roll Number"
+
+            <div className="px-8 pb-10 pt-8">
+              <div className="mb-6 grid grid-cols-1 gap-6 border-b border-slate-100 pb-8 md:grid-cols-2">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="studentName" className="text-sm font-bold text-slate-700">Student Name</Label>
+                  <Input
+                    id="studentName"
+                    value={student?.name ?? ""}
+                    disabled
+                    className="h-11 rounded-xl border-slate-200 bg-slate-50 text-slate-600 disabled:opacity-100"
+                    placeholder="Student Name"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="studentRollNo" className="text-sm font-bold text-slate-700">Roll Number</Label>
+                  <Input
+                    id="studentRollNo"
+                    value={student?.rollNo ?? rollNo}
+                    disabled
+                    className="h-11 rounded-xl border-slate-200 bg-slate-50 text-slate-600 disabled:opacity-100"
+                    placeholder="Roll Number"
+                  />
+                </div>
+                <div className="flex flex-col gap-2 md:col-span-2">
+                  <Label htmlFor="resultHeading" className="text-sm font-bold text-slate-700">Result Heading</Label>
+                  <Input
+                    id="resultHeading"
+                    value={heading}
+                    onChange={(e) => setEditedHeading(e.target.value)}
+                    className="h-11 rounded-xl border-slate-200 bg-white text-slate-700 focus:ring-[#2d1b6b]"
+                    placeholder="e.g. Semester 1, Final Exam 2025"
+                  />
+                </div>
+              </div>
+
+              {!hasAnySubjects ? (
+                <p className="mb-6 text-center text-sm font-medium text-slate-500 animate-pulse">
+                  Loading existing results...
+                </p>
+              ) : null}
+
+              <div className="mb-6 border-b border-slate-100 pb-4">
+                <h2 className="text-lg font-bold text-slate-800">Edit Subject Marks</h2>
+              </div>
+
+              <ResultSubjectFields
+                subjects={subjects}
+                onSubjectNameChange={(subjectIndex, name) => {
+                  setEditedSubjects((currentSubjects) => {
+                    const baseSubjects =
+                      currentSubjects ?? initialSubjectsFromExistingResult;
+                    const updatedSubjects = [...baseSubjects];
+                    updatedSubjects[subjectIndex] = {
+                      ...updatedSubjects[subjectIndex],
+                      name,
+                    };
+                    return updatedSubjects;
+                  });
+                }}
+                onSubjectMarksChange={(subjectIndex, marks) => {
+                  setEditedSubjects((currentSubjects) => {
+                    const baseSubjects =
+                      currentSubjects ?? initialSubjectsFromExistingResult;
+                    const updatedSubjects = [...baseSubjects];
+                    updatedSubjects[subjectIndex] = {
+                      ...updatedSubjects[subjectIndex],
+                      marks,
+                    };
+                    return updatedSubjects;
+                  });
+                }}
               />
+
+              {errorMessage ? (
+                <p className="mt-6 rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+                  {errorMessage}
+                </p>
+              ) : null}
+
+              <div className="mt-8 flex justify-center">
+                <Button
+                  className="h-12 w-full max-w-[240px] rounded-xl bg-[#2d1b6b] text-base font-bold text-white shadow-md hover:bg-[#3d278b] hover:shadow-lg disabled:opacity-70"
+                  disabled={isLoading}
+                  onClick={handleUpdateResultButtonClick}
+                >
+                  <RefreshCw className={`mr-2 h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
+                  {isLoading ? "Updating..." : "Update Result"}
+                </Button>
+              </div>
             </div>
-          </div>
-
-          <div className="mt-4">
-            <ResultSubjectFields
-              subjects={subjects}
-              onSubjectNameChange={(subjectIndex, name) => {
-                setEditedSubjects((currentSubjects) => {
-                  const baseSubjects =
-                    currentSubjects ?? initialSubjectsFromExistingResult;
-                  const updatedSubjects = [...baseSubjects];
-                  updatedSubjects[subjectIndex] = {
-                    ...updatedSubjects[subjectIndex],
-                    name,
-                  };
-                  return updatedSubjects;
-                });
-              }}
-              onSubjectMarksChange={(subjectIndex, marks) => {
-                setEditedSubjects((currentSubjects) => {
-                  const baseSubjects =
-                    currentSubjects ?? initialSubjectsFromExistingResult;
-                  const updatedSubjects = [...baseSubjects];
-                  updatedSubjects[subjectIndex] = {
-                    ...updatedSubjects[subjectIndex],
-                    marks,
-                  };
-                  return updatedSubjects;
-                });
-              }}
-            />
-          </div>
-
-          {errorMessage ? (
-            <p className="mt-3 text-sm text-red-600">{errorMessage}</p>
-          ) : null}
-        <div className="flex justify-center">
-          <Button
-            className="mt-4"
-            disabled={isLoading}
-            onClick={handleUpdateResultButtonClick}
-          >
-            {isLoading ? "Updating..." : "Update Result"}
-          </Button>
+          </Card>
         </div>
-        </Card>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }

@@ -5,10 +5,12 @@ export type SubjectMark = {
 
 export type ResultDocument = {
   rollNo: string;
+  heading: string;
   subjects: SubjectMark[];
 };
 
 export type CreateOrUpdateResultPayload = {
   rollNo: string;
+  heading: string;
   subjects: SubjectMark[];
 };
