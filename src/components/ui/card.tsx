@@ -28,3 +28,21 @@ export function CardDescription({
 }: React.HTMLAttributes<HTMLParagraphElement>) {
   return <p className={mergeClassNames("text-sm text-[#5f5770]", className)} {...props} />;
 }
+
+export function CardHeader({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={mergeClassNames("flex flex-col space-y-1.5 p-5 pb-0", className)} {...props} />
+  );
+}
+
+export function CardContent({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={mergeClassNames("p-5 pt-4", className)} {...props} />
+  );
+}

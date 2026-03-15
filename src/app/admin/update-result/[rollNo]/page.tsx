@@ -32,6 +32,7 @@ export default function UpdateResultPage() {
   const [editedSubjects, setEditedSubjects] = useState<
     { name: string; marks: number }[] | null
   >(null);
+  const [editedHeading, setEditedHeading] = useState<string | null>(null);
 
   const { data: student } = useGetSingleStudentByRollNumberQuery(rollNo);
   const { data: existingResult } = useGetStudentResultByRollNumberQuery(rollNo);
@@ -57,6 +58,7 @@ export default function UpdateResultPage() {
   }, [existingResult]);
 
   const subjects = editedSubjects ?? initialSubjectsFromExistingResult;
+  const heading = editedHeading ?? existingResult?.heading ?? "Semester 1";
 
   const hasAnySubjects = useMemo(
     () => subjects.some((subject) => subject.name.trim().length > 0),
@@ -68,13 +70,13 @@ export default function UpdateResultPage() {
       (subject) => !subject.name.trim() || Number.isNaN(subject.marks),
     );
 
-    if (hasIncompleteField) {
-      setErrorMessage("All subject and marks fields are required.");
+    if (!heading.trim() || hasIncompleteField) {
+      setErrorMessage("Result heading and all subject fields are required.");
       return;
     }
-
+ 
     try {
-      await updateResult({ rollNo, subjects }).unwrap();
+      await updateResult({ rollNo, heading, subjects }).unwrap();
       router.push("/admin/students");
     } catch (error) {
       setErrorMessage(
@@ -117,6 +119,16 @@ export default function UpdateResultPage() {
                     disabled
                     className="h-11 rounded-xl border-slate-200 bg-slate-50 text-slate-600 disabled:opacity-100"
                     placeholder="Roll Number"
+                  />
+                </div>
+                <div className="flex flex-col gap-2 md:col-span-2">
+                  <Label htmlFor="resultHeading" className="text-sm font-bold text-slate-700">Result Heading</Label>
+                  <Input
+                    id="resultHeading"
+                    value={heading}
+                    onChange={(e) => setEditedHeading(e.target.value)}
+                    className="h-11 rounded-xl border-slate-200 bg-white text-slate-700 focus:ring-[#2d1b6b]"
+                    placeholder="e.g. Semester 1, Final Exam 2025"
                   />
                 </div>
               </div>

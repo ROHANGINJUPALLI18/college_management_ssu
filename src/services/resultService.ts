@@ -58,6 +58,7 @@ export async function updateResult(
   );
 
   await updateDoc(resultDocumentReference, {
+    heading: resultPayload.heading,
     subjects: resultPayload.subjects,
   });
 }
