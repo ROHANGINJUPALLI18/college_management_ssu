@@ -7,6 +7,8 @@ import { Sidebar } from "@/components/sidebar";
 import { ResultSubjectFields } from "@/components/result-subject-fields";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { isAdminSessionAuthenticatedInLocalStorage } from "@/lib/session";
 import { useCreateStudentResultAndUpdateStudentPostingFlagMutation } from "@/store/api/portalApi";
 
@@ -23,6 +25,7 @@ export default function AddResultPage() {
   const params = useParams<{ rollNo: string }>();
   const rollNo = params.rollNo;
   const [errorMessage, setErrorMessage] = useState("");
+  const [heading, setHeading] = useState("Semester 1");
   const [subjects, setSubjects] = useState(defaultSubjects);
 
   const [createResult, { isLoading }] =
@@ -38,13 +41,13 @@ export default function AddResultPage() {
     const hasIncompleteField = subjects.some(
       (subject) => !subject.name.trim() || Number.isNaN(subject.marks),
     );
-    if (hasIncompleteField) {
-      setErrorMessage("All subject and marks fields are required.");
+    if (!heading.trim() || hasIncompleteField) {
+      setErrorMessage("Result heading and all subject fields are required.");
       return;
     }
 
     try {
-      await createResult({ rollNo, subjects }).unwrap();
+      await createResult({ rollNo, heading, subjects }).unwrap();
       router.push("/admin/students");
     } catch (error) {
       setErrorMessage(
@@ -68,6 +71,19 @@ export default function AddResultPage() {
             </div>
             
             <div className="px-8 pb-10 pt-8">
+              <div className="mb-8 grid grid-cols-1 gap-6 border-b border-slate-100 pb-8">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="resultHeading" className="text-sm font-bold text-slate-700">Result Heading</Label>
+                  <Input
+                    id="resultHeading"
+                    value={heading}
+                    onChange={(e) => setHeading(e.target.value)}
+                    className="h-11 rounded-xl border-slate-200 bg-white text-slate-700 focus:ring-[#2d1b6b]"
+                    placeholder="e.g. Semester 1, Final Exam 2025"
+                  />
+                </div>
+              </div>
+
               <div className="mb-6 border-b border-slate-100 pb-4">
                 <h2 className="text-lg font-bold text-slate-800">Subject Marks</h2>
               </div>
