@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ResultTable } from "@/components/result-table";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ShimmerBlock, Spinner } from "@/components/ui/loading-state";
 import { getStudentSessionFromLocalStorage } from "@/lib/session";
 import { useGetStudentResultByRollNumberQuery } from "@/store/api/portalApi";
 
@@ -33,7 +34,14 @@ export default function ResultDetailsPage() {
       <h1 className="text-3xl text-[#2f0a5e]">Result Details</h1>
 
       {isLoading ? (
-        <p className="mt-4 text-sm text-[#675d77]">Loading result...</p>
+        <Card className="mt-6 space-y-4">
+          <div className="flex items-center gap-3">
+            <Spinner className="text-[#2f0a5e]" />
+            <p className="text-sm text-[#675d77]">Loading result...</p>
+          </div>
+          <ShimmerBlock className="h-10 w-48" />
+          <ShimmerBlock className="h-40 w-full" />
+        </Card>
       ) : null}
 
       {!isLoading && !result ? (

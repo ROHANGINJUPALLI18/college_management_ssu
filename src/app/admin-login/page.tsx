@@ -6,7 +6,15 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Lightbulb, Pencil, MessageSquare, BookOpen, Send, ArrowLeft } from "lucide-react";
+import {
+  Loader2,
+  Lightbulb,
+  Pencil,
+  MessageSquare,
+  BookOpen,
+  Send,
+  ArrowLeft,
+} from "lucide-react";
 import { saveAdminSessionInLocalStorage } from "@/lib/session";
 import { useLoginAdminUsingEmailAndPasswordMutation } from "@/store/api/portalApi";
 import { Navbar } from "@/components/navbar";
@@ -22,9 +30,14 @@ type AdminLoginFormValues = z.infer<typeof adminLoginFormSchema>;
 export default function AdminLoginPage() {
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState("");
-  const [loginAdmin, { isLoading }] = useLoginAdminUsingEmailAndPasswordMutation();
+  const [loginAdmin, { isLoading }] =
+    useLoginAdminUsingEmailAndPasswordMutation();
 
-  const { register, handleSubmit, formState: { errors } } = useForm<AdminLoginFormValues>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<AdminLoginFormValues>({
     resolver: zodResolver(adminLoginFormSchema),
     defaultValues: {
       email: "",
@@ -33,14 +46,18 @@ export default function AdminLoginPage() {
     },
   });
 
-  async function handleAdminLoginFormSubmit(formValues: AdminLoginFormValues): Promise<void> {
+  async function handleAdminLoginFormSubmit(
+    formValues: AdminLoginFormValues,
+  ): Promise<void> {
     setErrorMessage("");
     try {
       await loginAdmin(formValues).unwrap();
       saveAdminSessionInLocalStorage();
-      router.push("/admin-dashboard");
+      router.replace("/admin/students");
     } catch (error) {
-      setErrorMessage((error as { error?: string })?.error ?? "Unable to login.");
+      setErrorMessage(
+        (error as { error?: string })?.error ?? "Unable to login.",
+      );
     }
   }
 
@@ -62,10 +79,15 @@ export default function AdminLoginPage() {
         <div className="w-full lg:w-[45%] flex justify-center p-8 sm:p-12 lg:p-16 xl:p-20 relative z-10 bg-white items-center">
           <div className="w-full max-w-[420px]">
             <div className="text-center lg:text-left mb-8">
-              <h1 className="text-[32px] sm:text-[36px] font-bold text-[#111111] font-sans tracking-tight">Admin Login</h1>
+              <h1 className="text-[32px] sm:text-[36px] font-bold text-[#111111] font-sans tracking-tight">
+                Admin Login
+              </h1>
             </div>
 
-            <form onSubmit={handleSubmit(handleAdminLoginFormSubmit)} className="space-y-4">
+            <form
+              onSubmit={handleSubmit(handleAdminLoginFormSubmit)}
+              className="space-y-4"
+            >
               <div className="space-y-1">
                 <input
                   id="email"
@@ -88,7 +110,9 @@ export default function AdminLoginPage() {
                   {...register("password")}
                 />
                 {errors.password && (
-                  <p className="text-xs text-red-500">{errors.password.message}</p>
+                  <p className="text-xs text-red-500">
+                    {errors.password.message}
+                  </p>
                 )}
               </div>
 
@@ -99,9 +123,14 @@ export default function AdminLoginPage() {
                     className="rounded border border-gray-300 text-[#2f0a5e] cursor-pointer focus:border-[#2f0a5e] focus:ring focus:ring-[#2f0a5e] focus:ring-opacity-20 w-4 h-4"
                     {...register("rememberMe")}
                   />
-                  <span className="text-gray-600 group-hover:text-[#2f0a5e] transition-colors">Remember me</span>
+                  <span className="text-gray-600 group-hover:text-[#2f0a5e] transition-colors">
+                    Remember me
+                  </span>
                 </label>
-                <Link href="#" className="text-[#2f0a5e] hover:underline font-medium">
+                <Link
+                  href="#"
+                  className="text-[#2f0a5e] hover:underline font-medium"
+                >
                   Forgot password?
                 </Link>
               </div>
@@ -118,7 +147,11 @@ export default function AdminLoginPage() {
                   disabled={isLoading}
                   className="inline-flex w-[120px] items-center justify-center rounded-[4px] bg-[#2f0a5e] px-4 py-2 text-[15px] font-medium text-white shadow-sm hover:bg-[#4A148C] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : "Log in"}
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-white" />
+                  ) : (
+                    "Log in"
+                  )}
                 </button>
               </div>
             </form>
@@ -127,17 +160,18 @@ export default function AdminLoginPage() {
 
         {/* Right Side: Decorative Pattern (Desktop Only) */}
         <div className="hidden lg:flex lg:flex-1 relative bg-[#E1DDF0] border-l border-[#dfd7ea] overflow-hidden items-center justify-center h-full">
-
           {/* Floating visual elements representing the reference image using Theme Colors (Purple & Yellow) */}
           <div className="absolute inset-0 w-full h-full opacity-[0.80] pointer-events-none">
-
             {/* Top Region */}
             <div className="absolute top-[8%] left-[20%] flex items-center justify-center w-[72px] h-[55px] bg-[#2f0a5e] rounded-[10px] shadow-[6px_6px_0_1px_rgba(246,177,0,0.6)] -rotate-6 animate-[bounce_4s_infinite]">
               <MessageSquare className="h-8 w-8 text-white" />
             </div>
 
             <div className="absolute top-[5%] left-[60%] flex drop-shadow-lg">
-              <Pencil className="h-16 w-16 text-[#f6b100] rotate-[35deg] fill-white" strokeWidth={1.5} />
+              <Pencil
+                className="h-16 w-16 text-[#f6b100] rotate-[35deg] fill-white"
+                strokeWidth={1.5}
+              />
             </div>
 
             <div className="absolute top-[18%] right-[15%] flex items-center justify-center w-[60px] h-[60px] bg-white rounded shadow-md border-l-4 border-b-4 border-[#2f0a5e] rotate-[-12deg]">
@@ -150,7 +184,10 @@ export default function AdminLoginPage() {
 
             {/* Middle Region */}
             <div className="absolute top-[38%] left-[25%] flex drop-shadow-[4px_4px_0_rgba(47,10,94,0.3)]">
-              <Send className="h-16 w-16 text-[#2f0a5e] -rotate-12 fill-[#2f0a5e]" strokeWidth={1} />
+              <Send
+                className="h-16 w-16 text-[#2f0a5e] -rotate-12 fill-[#2f0a5e]"
+                strokeWidth={1}
+              />
             </div>
 
             <div className="absolute top-[48%] left-[65%] flex items-center justify-center w-[65px] h-[48px] bg-white rounded-[10px] shadow-sm border-2 border-[#2f0a5e] border-r-[5px] border-b-[5px] rotate-3">

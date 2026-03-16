@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ShimmerBlock, Spinner } from "@/components/ui/loading-state";
 import { uploadStudentPhotoFileToCloudinary } from "@/lib/cloudinary";
 import { isAdminSessionAuthenticatedInLocalStorage } from "@/lib/session";
 import {
@@ -49,6 +50,7 @@ export function StudentForm({ editRollNo, onSuccess }: StudentFormProps) {
 
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [isPhotoUploading, setIsPhotoUploading] = useState(false);
   const [selectedPhotoFile, setSelectedPhotoFile] = useState<File | null>(null);
   const [createStudent, { isLoading }] = useCreateSingleStudentRecordMutation();
   const [updateStudentRecord, { isLoading: isUpdateLoading }] =
@@ -93,9 +95,13 @@ export function StudentForm({ editRollNo, onSuccess }: StudentFormProps) {
 
     try {
       if (isStudentEditMode && editRollNo) {
-        const uploadedPhotoUrl = selectedPhotoFile
-          ? await uploadStudentPhotoFileToCloudinary(selectedPhotoFile)
-          : existingStudentPhotoUrl;
+        let uploadedPhotoUrl = existingStudentPhotoUrl;
+        if (selectedPhotoFile) {
+          setIsPhotoUploading(true);
+          uploadedPhotoUrl =
+            await uploadStudentPhotoFileToCloudinary(selectedPhotoFile);
+          setIsPhotoUploading(false);
+        }
 
         await updateStudentRecord({
           rollNo: editRollNo,
@@ -124,8 +130,10 @@ export function StudentForm({ editRollNo, onSuccess }: StudentFormProps) {
         return;
       }
 
+      setIsPhotoUploading(true);
       const photoUrl =
         await uploadStudentPhotoFileToCloudinary(selectedPhotoFile);
+      setIsPhotoUploading(false);
       await createStudent({ ...formValues, photoUrl }).unwrap();
 
       setSuccessMessage("Student admitted successfully.");
@@ -142,10 +150,13 @@ export function StudentForm({ editRollNo, onSuccess }: StudentFormProps) {
             ? "Unable to update student details."
             : "Unable to create student."),
       );
+    } finally {
+      setIsPhotoUploading(false);
     }
   }
 
-  const isFormSubmitting = isLoading || isUpdateLoading;
+  const isFormSubmitting =
+    formState.isSubmitting || isLoading || isUpdateLoading || isPhotoUploading;
 
   return (
     <form
@@ -153,7 +164,12 @@ export function StudentForm({ editRollNo, onSuccess }: StudentFormProps) {
       onSubmit={handleSubmit(handleStudentAdmissionFormSubmit)}
     >
       {isStudentEditMode && isExistingStudentLoading ? (
-        <p className="text-xs text-[#675f74]">Loading student details...</p>
+        <div className="space-y-3 py-1">
+          <ShimmerBlock className="h-4 w-40" />
+          <ShimmerBlock className="h-10 w-full rounded-lg" />
+          <ShimmerBlock className="h-10 w-full rounded-lg" />
+          <ShimmerBlock className="h-10 w-full rounded-lg" />
+        </div>
       ) : null}
 
       <div className="flex flex-col space-y-1">
@@ -172,7 +188,10 @@ export function StudentForm({ editRollNo, onSuccess }: StudentFormProps) {
       </div>
 
       <div className="flex flex-col space-y-1">
-        <Label htmlFor="rollNo" className="text-xs font-semibold text-slate-700">
+        <Label
+          htmlFor="rollNo"
+          className="text-xs font-semibold text-slate-700"
+        >
           Roll Number
         </Label>
         <Input
@@ -203,7 +222,10 @@ export function StudentForm({ editRollNo, onSuccess }: StudentFormProps) {
       </div>
 
       <div className="flex flex-col space-y-1">
-        <Label htmlFor="course" className="text-xs font-semibold text-slate-700">
+        <Label
+          htmlFor="course"
+          className="text-xs font-semibold text-slate-700"
+        >
           Course
         </Label>
         <Input
@@ -229,6 +251,7 @@ export function StudentForm({ editRollNo, onSuccess }: StudentFormProps) {
             id="studentPhoto"
             type="file"
             accept="image/*"
+            disabled={isFormSubmitting}
             className="h-auto w-full cursor-pointer p-0 border-0 bg-transparent text-xs text-slate-500 shadow-none file:mr-3 file:border-0 file:bg-slate-200 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-[#32236a] hover:file:bg-slate-300 transition-all focus-visible:ring-0"
             onChange={(event) => {
               setSelectedPhotoFile(event.target.files?.[0] ?? null);
@@ -249,11 +272,17 @@ export function StudentForm({ editRollNo, onSuccess }: StudentFormProps) {
         disabled={isFormSubmitting}
         className="mt-3 h-10 w-full rounded-lg bg-[#2b1f63] text-sm font-bold tracking-wide text-white shadow-md transition-all hover:bg-[#322365] hover:shadow-lg disabled:opacity-70"
       >
-        <UserPlus className="mr-2 h-4 w-4" />
+        {isFormSubmitting ? (
+          <Spinner className="mr-2 h-4 w-4" />
+        ) : (
+          <UserPlus className="mr-2 h-4 w-4" />
+        )}
         {isFormSubmitting
-          ? isStudentEditMode
-            ? "Saving..."
-            : "Submitting..."
+          ? isPhotoUploading
+            ? "Uploading Photo..."
+            : isStudentEditMode
+              ? "Saving..."
+              : "Submitting..."
           : isStudentEditMode
             ? "Save Changes"
             : "Submit Record"}

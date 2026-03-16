@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ShimmerBlock, Spinner } from "@/components/ui/loading-state";
 import { isAdminSessionAuthenticatedInLocalStorage } from "@/lib/session";
 import {
   useGetSingleStudentByRollNumberQuery,
@@ -34,10 +35,13 @@ export default function UpdateResultPage() {
   >(null);
   const [editedHeading, setEditedHeading] = useState<string | null>(null);
 
-  const { data: student } = useGetSingleStudentByRollNumberQuery(rollNo);
-  const { data: existingResult } = useGetStudentResultByRollNumberQuery(rollNo);
+  const { data: student, isLoading: isStudentLoading } =
+    useGetSingleStudentByRollNumberQuery(rollNo);
+  const { data: existingResult, isLoading: isResultLoading } =
+    useGetStudentResultByRollNumberQuery(rollNo);
   const [updateResult, { isLoading }] =
     useUpdateStudentResultByRollNumberMutation();
+  const isPageLoading = isStudentLoading || isResultLoading;
 
   useEffect(() => {
     if (!isAdminSessionAuthenticatedInLocalStorage()) {
@@ -74,7 +78,7 @@ export default function UpdateResultPage() {
       setErrorMessage("Result heading and all subject fields are required.");
       return;
     }
- 
+
     try {
       await updateResult({ rollNo, heading, subjects }).unwrap();
       router.push("/admin/students");
@@ -93,16 +97,26 @@ export default function UpdateResultPage() {
         <div className="w-full max-w-[800px]">
           <Card className="overflow-hidden rounded-2xl border-0 bg-white shadow-[0_4px_24px_rgba(0,0,0,0.06)] ring-1 ring-slate-100">
             <div className="bg-[#2d1b6b] px-8 py-8 text-center text-white">
-              <h1 className="text-2xl font-bold tracking-tight">Update Student Result</h1>
+              <h1 className="text-2xl font-bold tracking-tight">
+                Update Student Result
+              </h1>
               <p className="mt-2 text-sm font-medium text-indigo-200">
-                Roll Number: <span className="text-white bg-indigo-500/30 px-2 py-0.5 rounded-md">{rollNo}</span>
+                Roll Number:{" "}
+                <span className="text-white bg-indigo-500/30 px-2 py-0.5 rounded-md">
+                  {rollNo}
+                </span>
               </p>
             </div>
 
             <div className="px-8 pb-10 pt-8">
               <div className="mb-6 grid grid-cols-1 gap-6 border-b border-slate-100 pb-8 md:grid-cols-2">
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="studentName" className="text-sm font-bold text-slate-700">Student Name</Label>
+                  <Label
+                    htmlFor="studentName"
+                    className="text-sm font-bold text-slate-700"
+                  >
+                    Student Name
+                  </Label>
                   <Input
                     id="studentName"
                     value={student?.name ?? ""}
@@ -112,7 +126,12 @@ export default function UpdateResultPage() {
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="studentRollNo" className="text-sm font-bold text-slate-700">Roll Number</Label>
+                  <Label
+                    htmlFor="studentRollNo"
+                    className="text-sm font-bold text-slate-700"
+                  >
+                    Roll Number
+                  </Label>
                   <Input
                     id="studentRollNo"
                     value={student?.rollNo ?? rollNo}
@@ -122,10 +141,16 @@ export default function UpdateResultPage() {
                   />
                 </div>
                 <div className="flex flex-col gap-2 md:col-span-2">
-                  <Label htmlFor="resultHeading" className="text-sm font-bold text-slate-700">Result Heading</Label>
+                  <Label
+                    htmlFor="resultHeading"
+                    className="text-sm font-bold text-slate-700"
+                  >
+                    Result Heading
+                  </Label>
                   <Input
                     id="resultHeading"
                     value={heading}
+                    disabled={isLoading || isPageLoading}
                     onChange={(e) => setEditedHeading(e.target.value)}
                     className="h-11 rounded-xl border-slate-200 bg-white text-slate-700 focus:ring-[#2d1b6b]"
                     placeholder="e.g. Semester 1, Final Exam 2025"
@@ -133,18 +158,27 @@ export default function UpdateResultPage() {
                 </div>
               </div>
 
-              {!hasAnySubjects ? (
+              {isPageLoading ? (
+                <div className="mb-6 space-y-3">
+                  <ShimmerBlock className="h-4 w-44" />
+                  <ShimmerBlock className="h-24 w-full rounded-2xl" />
+                  <ShimmerBlock className="h-24 w-full rounded-2xl" />
+                </div>
+              ) : !hasAnySubjects ? (
                 <p className="mb-6 text-center text-sm font-medium text-slate-500 animate-pulse">
                   Loading existing results...
                 </p>
               ) : null}
 
               <div className="mb-6 border-b border-slate-100 pb-4">
-                <h2 className="text-lg font-bold text-slate-800">Edit Subject Marks</h2>
+                <h2 className="text-lg font-bold text-slate-800">
+                  Edit Subject Marks
+                </h2>
               </div>
 
               <ResultSubjectFields
                 subjects={subjects}
+                disabled={isLoading || isPageLoading}
                 onSubjectNameChange={(subjectIndex, name) => {
                   setEditedSubjects((currentSubjects) => {
                     const baseSubjects =
@@ -180,10 +214,14 @@ export default function UpdateResultPage() {
               <div className="mt-8 flex justify-center">
                 <Button
                   className="h-12 w-full max-w-[240px] rounded-xl bg-[#2d1b6b] text-base font-bold text-white shadow-md hover:bg-[#3d278b] hover:shadow-lg disabled:opacity-70"
-                  disabled={isLoading}
+                  disabled={isLoading || isPageLoading}
                   onClick={handleUpdateResultButtonClick}
                 >
-                  <RefreshCw className={`mr-2 h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
+                  {isLoading ? (
+                    <Spinner className="mr-2 h-5 w-5" />
+                  ) : (
+                    <RefreshCw className="mr-2 h-5 w-5" />
+                  )}
                   {isLoading ? "Updating..." : "Update Result"}
                 </Button>
               </div>

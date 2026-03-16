@@ -10,12 +10,14 @@ type ResultSubjectFieldsProps = {
   subjects: SubjectFormValue[];
   onSubjectNameChange: (subjectIndex: number, name: string) => void;
   onSubjectMarksChange: (subjectIndex: number, marks: number) => void;
+  disabled?: boolean;
 };
 
 export function ResultSubjectFields({
   subjects,
   onSubjectNameChange,
   onSubjectMarksChange,
+  disabled = false,
 }: ResultSubjectFieldsProps) {
   return (
     <div className="grid gap-4">
@@ -33,6 +35,7 @@ export function ResultSubjectFields({
             <div className="flex flex-col gap-1.5">
               <Input
                 value={subject.name}
+                disabled={disabled}
                 onChange={(event) => {
                   onSubjectNameChange(subjectIndex, event.target.value);
                 }}
@@ -43,8 +46,12 @@ export function ResultSubjectFields({
             <div className="flex flex-col gap-1.5">
               <Input
                 value={Number.isNaN(subject.marks) ? "" : subject.marks}
+                disabled={disabled}
                 onChange={(event) => {
-                  onSubjectMarksChange(subjectIndex, Number(event.target.value));
+                  onSubjectMarksChange(
+                    subjectIndex,
+                    Number(event.target.value),
+                  );
                 }}
                 type="number"
                 min={0}
