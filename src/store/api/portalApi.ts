@@ -8,7 +8,9 @@ import {
 } from "@/services/studentService";
 import {
   createResult,
+  getResultByResultId,
   getResultByRollNo,
+  getResultsByRollNo,
   updateResult,
 } from "@/services/resultService";
 import type {
@@ -16,7 +18,11 @@ import type {
   StudentDocument,
   StudentLoginPayload,
 } from "@/types/student";
-import type { CreateOrUpdateResultPayload, ResultDocument } from "@/types/result";
+import type {
+  CreateOrUpdateResultPayload,
+  ResultDocument,
+  UpdateResultPayload,
+} from "@/types/result";
 
 const ADMIN_EMAIL = "admin@university.com";
 const ADMIN_PASSWORD = "admin123";
@@ -177,9 +183,41 @@ export const portalApi = createApi({
       },
       providesTags: ["Results"],
     }),
+    getStudentResultsByRollNumber: buildEndpoint.query<ResultDocument[], string>({
+      async queryFn(rollNo) {
+        try {
+          const results = await getResultsByRollNo(rollNo);
+          return { data: results };
+        } catch (error) {
+          return {
+            error: {
+              status: "CUSTOM_ERROR",
+              error: (error as Error).message,
+            },
+          };
+        }
+      },
+      providesTags: ["Results"],
+    }),
+    getStudentResultByResultId: buildEndpoint.query<ResultDocument | null, string>({
+      async queryFn(resultId) {
+        try {
+          const result = await getResultByResultId(resultId);
+          return { data: result };
+        } catch (error) {
+          return {
+            error: {
+              status: "CUSTOM_ERROR",
+              error: (error as Error).message,
+            },
+          };
+        }
+      },
+      providesTags: ["Results"],
+    }),
     updateStudentResultByRollNumber: buildEndpoint.mutation<
       void,
-      CreateOrUpdateResultPayload
+      UpdateResultPayload
     >({
       async queryFn(payload) {
         try {
@@ -208,5 +246,7 @@ export const {
   useUpdateSingleStudentRecordMutation,
   useCreateStudentResultAndUpdateStudentPostingFlagMutation,
   useGetStudentResultByRollNumberQuery,
+  useGetStudentResultByResultIdQuery,
+  useGetStudentResultsByRollNumberQuery,
   useUpdateStudentResultByRollNumberMutation,
 } = portalApi;

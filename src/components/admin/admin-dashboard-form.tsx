@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -52,6 +53,7 @@ export function StudentForm({ editRollNo, onSuccess }: StudentFormProps) {
   const [successMessage, setSuccessMessage] = useState("");
   const [isPhotoUploading, setIsPhotoUploading] = useState(false);
   const [selectedPhotoFile, setSelectedPhotoFile] = useState<File | null>(null);
+  const [selectedPhotoPreviewUrl, setSelectedPhotoPreviewUrl] = useState("");
   const [createStudent, { isLoading }] = useCreateSingleStudentRecordMutation();
   const [updateStudentRecord, { isLoading: isUpdateLoading }] =
     useUpdateSingleStudentRecordMutation();
@@ -86,6 +88,20 @@ export function StudentForm({ editRollNo, onSuccess }: StudentFormProps) {
   }, [existingStudentDetails, reset]);
 
   const existingStudentPhotoUrl = existingStudentDetails?.photoUrl ?? "";
+
+  useEffect(() => {
+    if (!selectedPhotoFile) {
+      setSelectedPhotoPreviewUrl("");
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(selectedPhotoFile);
+    setSelectedPhotoPreviewUrl(objectUrl);
+
+    return () => {
+      URL.revokeObjectURL(objectUrl);
+    };
+  }, [selectedPhotoFile]);
 
   async function handleStudentAdmissionFormSubmit(
     formValues: StudentAdmissionFormValues,
@@ -246,6 +262,30 @@ export function StudentForm({ editRollNo, onSuccess }: StudentFormProps) {
         >
           Photo
         </Label>
+        {isStudentEditMode ? (
+          <div className="mb-2 flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+            <div className="relative h-12 w-12 overflow-hidden rounded-full ring-1 ring-slate-200">
+              {selectedPhotoPreviewUrl || existingStudentPhotoUrl ? (
+                <Image
+                  src={selectedPhotoPreviewUrl || existingStudentPhotoUrl}
+                  alt={`${existingStudentDetails?.name ?? "Student"} profile photo`}
+                  fill
+                  sizes="48px"
+                  className="object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-slate-200 text-[10px] font-bold uppercase text-slate-500">
+                  NA
+                </div>
+              )}
+            </div>
+            <p className="text-xs font-semibold text-slate-600">
+              {selectedPhotoFile
+                ? "New photo selected"
+                : "Current profile photo"}
+            </p>
+          </div>
+        ) : null}
         <div className="flex w-full overflow-hidden items-center rounded-lg border-2 border-dashed border-slate-300/80 bg-slate-50/50 hover:bg-slate-50 transition-colors">
           <Input
             id="studentPhoto"

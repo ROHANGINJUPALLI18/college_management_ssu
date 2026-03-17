@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { FiEdit2, FiTrash2, FiPlus } from "react-icons/fi";
 import { Inbox, ChevronLeft, ChevronRight } from "lucide-react";
 import { Sidebar } from "@/components/sidebar";
@@ -51,12 +52,7 @@ export default function AdminStudentListPage() {
   }
 
   function handleStudentRowClickForResultFlow(student: StudentDocument): void {
-    if (student.resultPosted) {
-      router.push(`/admin/update-result/${encodeURIComponent(student.rollNo)}`);
-      return;
-    }
-
-    router.push(`/admin/add-result/${encodeURIComponent(student.rollNo)}`);
+    router.push(`/admin/update-result/${encodeURIComponent(student.rollNo)}`);
   }
 
   async function handleSoftDeleteStudentActionClick(
@@ -126,6 +122,12 @@ export default function AdminStudentListPage() {
                       Name
                     </TableHead>
                     <TableHead className="h-14 px-6 text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                      Photo
+                    </TableHead>
+                    <TableHead className="h-14 px-6 text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                      DOB
+                    </TableHead>
+                    <TableHead className="h-14 px-6 text-[11px] font-bold uppercase tracking-widest text-slate-500">
                       Course
                     </TableHead>
                     <TableHead className="h-14 px-6 text-[11px] font-bold uppercase tracking-widest text-slate-500">
@@ -156,6 +158,20 @@ export default function AdminStudentListPage() {
                         </TableCell>
                         <TableCell className="px-6 py-4 text-sm font-semibold text-slate-700">
                           {student.name}
+                        </TableCell>
+                        <TableCell className="px-6 py-4">
+                          <div className="relative h-10 w-10 overflow-hidden rounded-full ring-1 ring-slate-200">
+                            <Image
+                              src={student.photoUrl}
+                              alt={`${student.name} profile photo`}
+                              fill
+                              sizes="40px"
+                              className="object-cover"
+                            />
+                          </div>
+                        </TableCell>
+                        <TableCell className="px-6 py-4 text-sm text-slate-600">
+                          {student.dob}
                         </TableCell>
                         <TableCell className="px-6 py-4 text-sm text-slate-600">
                           {student.course}

@@ -49,7 +49,7 @@ export default function AddResultPage() {
 
     try {
       await createResult({ rollNo, heading, subjects }).unwrap();
-      router.push("/admin/students");
+      router.push(`/admin/update-result/${encodeURIComponent(rollNo)}`);
     } catch (error) {
       setErrorMessage(
         (error as { error?: string })?.error ?? "Unable to post result.",

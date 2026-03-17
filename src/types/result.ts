@@ -4,13 +4,21 @@ export type SubjectMark = {
 };
 
 export type ResultDocument = {
+  id: string;
+  rollNo: string;
+  heading: string;
+  subjects: SubjectMark[];
+  createdAt?: string;
+};
+
+export type CreateOrUpdateResultPayload = {
   rollNo: string;
   heading: string;
   subjects: SubjectMark[];
 };
 
-export type CreateOrUpdateResultPayload = {
-  rollNo: string;
+export type UpdateResultPayload = {
+  resultId: string;
   heading: string;
   subjects: SubjectMark[];
 };
