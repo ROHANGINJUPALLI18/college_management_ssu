@@ -11,6 +11,7 @@ import { Spinner, TableShimmerRows } from "@/components/ui/loading-state";
 import { Table, TableCell, TableHead } from "@/components/ui/table";
 import { Modal } from "@/components/ui/modal";
 import { StudentForm } from "@/components/admin/admin-dashboard-form";
+// the below impot is for the
 import { isAdminSessionAuthenticatedInLocalStorage } from "@/lib/session";
 import {
   useGetAllStudentsFromFirestoreQuery,
@@ -116,13 +117,13 @@ export default function AdminStudentListPage() {
                       S.No
                     </TableHead>
                     <TableHead className="h-14 px-6 text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                      Photo
+                    </TableHead>
+                    <TableHead className="h-14 px-6 text-[11px] font-bold uppercase tracking-widest text-slate-500">
                       Roll Number
                     </TableHead>
                     <TableHead className="h-14 px-6 text-[11px] font-bold uppercase tracking-widest text-slate-500">
                       Name
-                    </TableHead>
-                    <TableHead className="h-14 px-6 text-[11px] font-bold uppercase tracking-widest text-slate-500">
-                      Photo
                     </TableHead>
                     <TableHead className="h-14 px-6 text-[11px] font-bold uppercase tracking-widest text-slate-500">
                       DOB
@@ -130,9 +131,9 @@ export default function AdminStudentListPage() {
                     <TableHead className="h-14 px-6 text-[11px] font-bold uppercase tracking-widest text-slate-500">
                       Course
                     </TableHead>
-                    <TableHead className="h-14 px-6 text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                    {/* <TableHead className="h-14 px-6 text-[11px] font-bold uppercase tracking-widest text-slate-500">
                       Result Status
-                    </TableHead>
+                    </TableHead> */}
                     <TableHead className="h-14 px-6 text-right text-[11px] font-bold uppercase tracking-widest text-slate-500">
                       Action
                     </TableHead>
@@ -153,12 +154,6 @@ export default function AdminStudentListPage() {
                         <TableCell className="px-6 py-4 text-sm font-medium text-slate-500">
                           {index + 1}
                         </TableCell>
-                        <TableCell className="px-6 py-4 text-sm font-bold text-slate-900">
-                          {student.rollNo}
-                        </TableCell>
-                        <TableCell className="px-6 py-4 text-sm font-semibold text-slate-700">
-                          {student.name}
-                        </TableCell>
                         <TableCell className="px-6 py-4">
                           <div className="relative h-10 w-10 overflow-hidden rounded-full ring-1 ring-slate-200">
                             <Image
@@ -170,13 +165,19 @@ export default function AdminStudentListPage() {
                             />
                           </div>
                         </TableCell>
+                        <TableCell className="px-6 py-4 text-sm font-bold text-slate-900">
+                          {student.rollNo}
+                        </TableCell>
+                        <TableCell className="px-6 py-4 text-sm font-semibold text-slate-700">
+                          {student.name}
+                        </TableCell>
                         <TableCell className="px-6 py-4 text-sm text-slate-600">
                           {student.dob}
                         </TableCell>
                         <TableCell className="px-6 py-4 text-sm text-slate-600">
                           {student.course}
                         </TableCell>
-                        <TableCell className="px-6 py-4">
+                        {/* <TableCell className="px-6 py-4">
                           <span
                             className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ${
                               student.resultPosted
@@ -186,9 +187,9 @@ export default function AdminStudentListPage() {
                           >
                             {student.resultPosted ? "Result Posted" : "Pending"}
                           </span>
-                        </TableCell>
+                        </TableCell> */}
                         <TableCell className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-3 opacity-0 transition-opacity group-hover:opacity-100">
+                          <div className="flex items-center justify-end gap-3  transition-opacity group-hover:opacity-100">
                             <button
                               type="button"
                               className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600 transition hover:bg-blue-100"

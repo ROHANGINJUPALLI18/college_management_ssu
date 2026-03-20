@@ -110,7 +110,7 @@ export async function updateResult(
   await ensureFirebaseAnonymousSessionIsActive();
 
   if (!firestoreDatabase) {
-    throw new Error("Firebase is not configured. Please add Firebase env values.");
+    throw new Error("Firebase is not configured. Please add Firebase env values to get the accurate results.");
   }
 
   const resultDocumentReference = doc(firestoreDatabase, "results", resultPayload.resultId);
