@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Modal } from "@/components/ui/modal";
 import { ShimmerBlock, Spinner } from "@/components/ui/loading-state";
 import { uploadStudentPhotoFileToCloudinary } from "@/lib/cloudinary";
 import { isAdminSessionAuthenticatedInLocalStorage } from "@/lib/session";
@@ -54,6 +55,7 @@ export function StudentForm({ editRollNo, onSuccess }: StudentFormProps) {
   const [isPhotoUploading, setIsPhotoUploading] = useState(false);
   const [selectedPhotoFile, setSelectedPhotoFile] = useState<File | null>(null);
   const [selectedPhotoPreviewUrl, setSelectedPhotoPreviewUrl] = useState("");
+  const [previewImageUrl, setPreviewImageUrl] = useState("");
   const [createStudent, { isLoading }] = useCreateSingleStudentRecordMutation();
   const [updateStudentRecord, { isLoading: isUpdateLoading }] =
     useUpdateSingleStudentRecordMutation();
@@ -327,6 +329,24 @@ export function StudentForm({ editRollNo, onSuccess }: StudentFormProps) {
             ? "Save Changes"
             : "Submit Record"}
       </Button>
+          <Modal
+        isOpen={Boolean(previewImageUrl)}
+        onClose={() => setPreviewImageUrl("")}
+      >
+        <div className="bg-black p-3">
+          <div className="relative h-[70vh] w-full">
+            {previewImageUrl ? (
+              <Image
+                src={previewImageUrl}
+                alt="Student full profile"
+                fill
+                sizes="90vw"
+                className="object-contain"
+              />
+            ) : null}
+          </div>
+        </div>
+      </Modal>
     </form>
   );
 }
@@ -368,3 +388,5 @@ export function AdminDashboardForm({
     </div>
   );
 }
+
+

@@ -34,7 +34,9 @@ export default function AdminStudentListPage() {
   // modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalEditRollNo, setModalEditRollNo] = useState<string | null>(null);
-  useEffect(() => {
+  
+  const [previewImage, setPreviewImage] = useState<{ url: string; name: string } | null>(null);
+useEffect(() => {
     if (!isAdminSessionAuthenticatedInLocalStorage()) {
       router.replace("/admin-login");
     }
@@ -56,7 +58,14 @@ export default function AdminStudentListPage() {
     router.push(`/admin/update-result/${encodeURIComponent(student.rollNo)}`);
   }
 
-  async function handleSoftDeleteStudentActionClick(
+  
+  function handlePreviewImageClick(student: StudentDocument): void {
+    setPreviewImage({
+      url: student.photoUrl,
+      name: student.name,
+    });
+  }
+async function handleSoftDeleteStudentActionClick(
     studentRollNumber: string,
   ): Promise<void> {
     setStudentTableActionErrorMessage("");
@@ -155,7 +164,15 @@ export default function AdminStudentListPage() {
                           {index + 1}
                         </TableCell>
                         <TableCell className="px-6 py-4">
-                          <div className="relative h-10 w-10 overflow-hidden rounded-full ring-1 ring-slate-200">
+                          <button
+                            type="button"
+                            className="relative h-10 w-10 overflow-hidden rounded-full ring-1 ring-slate-200 transition-transform hover:scale-105"
+                            title="View full image"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handlePreviewImageClick(student);
+                            }}
+                          >
                             <Image
                               src={student.photoUrl}
                               alt={`${student.name} profile photo`}
@@ -163,7 +180,7 @@ export default function AdminStudentListPage() {
                               sizes="40px"
                               className="object-cover"
                             />
-                          </div>
+                          </button>
                         </TableCell>
                         <TableCell className="px-6 py-4 text-sm font-bold text-slate-900">
                           {student.rollNo}
@@ -317,7 +334,29 @@ export default function AdminStudentListPage() {
             />
           </div>
         </Modal>
+
+        <Modal
+          isOpen={Boolean(previewImage)}
+          onClose={() => setPreviewImage(null)}
+        >
+          <div className="bg-black p-3">
+            <div className="relative h-[70vh] w-full">
+              {previewImage ? (
+                <Image
+                  src={previewImage.url}
+                  alt={`${previewImage.name} full profile`}
+                  fill
+                  sizes="90vw"
+                  className="object-contain"
+                />
+              ) : null}
+            </div>
+          </div>
+        </Modal>
       </main>
     </div>
   );
 }
+
+
+

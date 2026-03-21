@@ -64,7 +64,7 @@ export default function StudentLoginPage() {
         <div className="w-full lg:w-[45%] flex justify-center p-8 sm:p-12 lg:p-16 xl:p-20 relative z-10 bg-white items-center border-l lg:border-l-0 lg:border-r border-[#dfd7ea]">
           <div className="w-full max-w-[420px]">
             <div className="text-center lg:text-left mb-8">
-              <h1 className="text-[32px] sm:text-[36px] font-bold text-[#111111] font-sans tracking-tight">Student Login</h1>
+              <h1 className="text-[32px] sm:text-[36px] text-center font-bold text-[#111111] font-sans tracking-tight">Student Login</h1>
             </div>
 
             <form onSubmit={handleSubmit(handleStudentLoginFormSubmit)} className="space-y-4">

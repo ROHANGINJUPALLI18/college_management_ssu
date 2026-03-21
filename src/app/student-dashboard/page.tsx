@@ -159,7 +159,7 @@ export default function StudentDashboardPage() {
             <span className="inline-block h-4 w-1.5 rounded-full bg-[#f6b100]" />
             Semester Results
           </h2>
-          <Button
+          {/* <Button
             onClick={handleDownloadResultPDF}
             disabled={results.length === 0 || isGeneratingResultPDF}
             className="h-9 rounded-lg bg-[#2f0a5e] px-4 text-xs font-bold text-white hover:bg-[#25084a] disabled:opacity-60"
@@ -175,7 +175,7 @@ export default function StudentDashboardPage() {
                 Download Latest Result PDF
               </>
             )}
-          </Button>
+          </Button> */}
         </div>
 
         <div className="rounded-xl border border-[#e8e0f5] bg-white shadow-sm overflow-hidden divide-y divide-[#f0eaf8] transition-all duration-300 hover:ring-2 hover:ring-[#2f0a5e] hover:border-[#2f0a5e]/50 hover:shadow-lg">
@@ -222,7 +222,7 @@ export default function StudentDashboardPage() {
                       <Download className="h-4 w-4" />
                       <span className="hidden sm:inline">Download</span>
                     </button>
-                    <ChevronRight className="h-5 w-5 text-gray-300 group-hover:text-[#f6b100] transition-colors" />
+                    {/* <ChevronRight className="h-5 w-5 text-gray-300 group-hover:text-[#f6b100] transition-colors" /> */}
                   </div>
                 </div>
               ) : (
